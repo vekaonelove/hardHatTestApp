@@ -1,12 +1,17 @@
-const hre = require("hardhat");
+const { ethers } = require("hardhat");
+const { parseEther } = require("ethers");
 
 async function main() {
-    const Greeting = await hre.ethers.getContractFactory("Greeting");
-    const greeting = await Greeting.deploy("Alice"); // Deploy contract with constructor argument
+    const [deployer] = await ethers.getSigners();
 
-    await greeting.waitForDeployment();
+    console.log("Deploying contract with account:", deployer.address);
 
-    console.log("Greeting deployed to:", greeting.target);
+    const MyToken = await ethers.getContractFactory("MyToken");
+    const myToken = await MyToken.deploy(parseEther("1000000")); // 1 million tokens
+
+    await myToken.waitForDeployment();
+
+    console.log("MyToken deployed to:", myToken.target);
 }
 
 main().catch((error) => {
@@ -14,4 +19,4 @@ main().catch((error) => {
     process.exitCode = 1;
 });
 
-//Greeting deployed to: 0x07Bd329467eA8FbaC3FBc5e58FEa2bCd3e3407B7
+//made some changes to the script to compile, because my local hardhat uses Ethers.js v6
