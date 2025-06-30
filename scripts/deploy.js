@@ -1,22 +1,21 @@
-const { ethers } = require("hardhat");
-const { parseEther } = require("ethers");
+const hre = require("hardhat");
+const { ethers, upgrades } = hre;
 
 async function main() {
-    const [deployer] = await ethers.getSigners();
+    const MyTokenV1 = await ethers.getContractFactory("MyTokenV1");
 
-    console.log("Deploying contract with account:", deployer.address);
-
-    const MyToken = await ethers.getContractFactory("MyToken");
-    const myToken = await MyToken.deploy(parseEther("1000000")); // 1 million tokens
-
+    console.log("Deploying MyTokenV1...");
+    const myToken = await upgrades.deployProxy(MyTokenV1, [ethers.parseEther("1000000")], {
+        initializer: "initialize",
+    });
     await myToken.waitForDeployment();
 
-    console.log("MyToken deployed to:", myToken.target);
+    console.log("MyTokenV1 deployed to:", await myToken.getAddress());
 }
 
-main().catch((error) => {
-    console.error(error);
-    process.exitCode = 1;
-});
-
-//made some changes to the script to compile, because my local hardhat uses Ethers.js v6
+main()
+    .then(() => process.exit(0))
+    .catch((error) => {
+        console.error(error);
+        process.exit(1);
+    });
